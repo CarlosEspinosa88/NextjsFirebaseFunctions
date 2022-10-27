@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import Link from 'next/link';
 import Navigator from '../src/components/Navigator'
 import InfoCard from '../src/components/InfoCard'
 
@@ -18,9 +19,9 @@ export default function Home() {
         <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
           <h1 className="text-6xl font-bold">
             Welcome to{' '}
-            <a className="text-blue-600" href="https://nextjs.org">
+            <Link className="text-blue-600" href="/example">
               Next.js!
-            </a>
+            </Link>
             <div className="rounded-md shadow">
               <a href="#" className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 md:py-4 md:px-10 md:text-lg">Get started</a>
             </div>
