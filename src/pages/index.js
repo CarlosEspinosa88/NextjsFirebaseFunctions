@@ -1,6 +1,37 @@
+import { useState } from 'react'
+// import useSWR from 'swr'
 import Head from 'next/head'
+import { collection, getDocs } from "firebase/firestore";
+import { db } from '../firestore/client'
 
-export default function Home() {
+
+const fetcher = (url) => fetch(url).then((res) => res.json())
+
+export async function getStaticProps() {
+  return { props: 
+    { isStatic: true } 
+  }
+}
+
+export default function Home(props) {
+  const [user, setUser ]= useState([])
+  // const { data, error } = useSWR('/api/people', fetcher)
+
+  async function handlerDataFromFirebase(params) {
+    const querySnapshot = await getDocs(collection(db, "test-001"));
+    
+    querySnapshot.forEach((doc) => {
+      if(doc.id) {
+        setUser((prevState) => [...prevState, doc.data()])
+      }
+    });
+  }
+
+  // if (error) return <div>Failed to load</div>
+  // if (!data) return <div>Loading...</div>
+
+  
+  
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
       <Head>
@@ -10,12 +41,68 @@ export default function Home() {
       </Head>
 
       <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
+        <div>
+          <div>
+            {
+              props?.isSSR ? (
+                <h2 className="text-3xl font-bold">
+                  😁 SSR Working
+                </h2>
+              ) : (
+                <h2 className="text-3xl font-bold">
+                  🥺 SSR Not Works
+                </h2>
+              )
+            }
+          </div>
+
+          <div>
+            {
+              props?.isStatic ? (
+                <h2 className="text-3xl font-bold">
+                  😁 Static generated
+                </h2>
+              ) : (
+                <h2 className="text-3xl font-bold">
+                  🥺 is Not Static
+                </h2>
+              )
+            }
+          </div>
+
+          {/* <div className="bg-blue-50">
+            <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+              <h1 className="text-2xl font-bold">Local data using SWR</h1>
+              <ul>
+                {data.map((p) => (
+                  <div key={p.id}>
+                    {p.name}
+                  </div>
+                ))}
+              </ul>
+            </div>
+          </div> */}
+
+
+          <div className="bg-green-50">
+            <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+              <h1 className="text-2xl font-bold">Fetching data from firebase</h1>  
+              <ul>
+                {user.length > 0 && user.map((p) => (
+                  <div key={p.id}>
+                    {p.name}
+                  </div>
+                ))}
+              </ul>
+              <button 
+                className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-5 py-3 text-base font-medium text-white hover:bg-indigo-700" 
+                onClick={handlerDataFromFirebase}
+              >
+                Fetch
+              </button>
+            </div>
+          </div>
+        </div>      
       </main>
     </div>
   )
