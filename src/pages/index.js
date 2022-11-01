@@ -1,8 +1,6 @@
-import { useState } from 'react'
-// import useSWR from 'swr'
+import { useEffect, useCallback } from 'react'
 import Head from 'next/head'
-import { collection, getDocs } from "firebase/firestore";
-import { db } from '../firestore/client'
+import useGetUserFirebase from '../hooks/useGetUserFirebase'
 
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
@@ -14,24 +12,8 @@ export async function getStaticProps() {
 }
 
 export default function Home(props) {
-  const [user, setUser ]= useState([])
-  // const { data, error } = useSWR('/api/people', fetcher)
+  const { users, loading, error, handlerDataFromFirebase} = useGetUserFirebase()
 
-  async function handlerDataFromFirebase(params) {
-    const querySnapshot = await getDocs(collection(db, "test-001"));
-    
-    querySnapshot.forEach((doc) => {
-      if(doc.id) {
-        setUser((prevState) => [...prevState, doc.data()])
-      }
-    });
-  }
-
-  // if (error) return <div>Failed to load</div>
-  // if (!data) return <div>Loading...</div>
-
-  
-  
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
       <Head>
@@ -43,8 +25,7 @@ export default function Home(props) {
       <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
         <div>
           <div>
-            {
-              props?.isSSR ? (
+            {props?.isSSR ? (
                 <h2 className="text-3xl font-bold">
                   😁 SSR Working
                 </h2>
@@ -55,10 +36,8 @@ export default function Home(props) {
               )
             }
           </div>
-
           <div>
-            {
-              props?.isStatic ? (
+            {props?.isStatic ? (
                 <h2 className="text-3xl font-bold">
                   😁 Static generated
                 </h2>
@@ -69,37 +48,25 @@ export default function Home(props) {
               )
             }
           </div>
-
-          {/* <div className="bg-blue-50">
-            <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
-              <h1 className="text-2xl font-bold">Local data using SWR</h1>
-              <ul>
-                {data.map((p) => (
-                  <div key={p.id}>
-                    {p.name}
-                  </div>
-                ))}
-              </ul>
-            </div>
-          </div> */}
-
-
           <div className="bg-green-50">
-            <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
-              <h1 className="text-2xl font-bold">Fetching data from firebase</h1>  
-              <ul>
-                {user.length > 0 && user.map((p) => (
-                  <div key={p.id}>
-                    {p.name}
-                  </div>
-                ))}
-              </ul>
+            <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:items-center lg:justify-between lg:py-16 lg:px-8">
+              <h1 className="text-2xl font-bold">Click the button and fetch data from Firebase</h1>  
+              {loading ? <p>...Loading</p> : (
+                <ul>
+                  {users.length > 0 && users.map((user) => (
+                    <div key={user.id}>
+                      {user.name}
+                    </div>
+                  ))}
+                </ul>
+              )}
               <button 
                 className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-5 py-3 text-base font-medium text-white hover:bg-indigo-700" 
                 onClick={handlerDataFromFirebase}
-              >
-                Fetch
+                >
+                Fetch me
               </button>
+              {error !== '' && <p>{error}</p>}
             </div>
           </div>
         </div>      
